@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
-import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniOrangeLight
 
 @Composable
@@ -37,11 +36,11 @@ fun PreparacionScreen(receta: RecetaContenido, alVolver: () -> Unit) {
     val paso = receta.pasos[pasoActual]
 
     Column(
-        modifier = Modifier.fillMaxSize().background(MartiniCream).padding(20.dp)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = alVolver) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Volver al detalle")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver al detalle")
             }
             Text(
                 "Paso ${pasoActual + 1} de ${receta.pasos.size}",

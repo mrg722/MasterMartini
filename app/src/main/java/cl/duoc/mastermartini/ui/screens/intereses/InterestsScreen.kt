@@ -52,12 +52,10 @@ import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
 import cl.duoc.mastermartini.ui.components.StepDots
 import cl.duoc.mastermartini.ui.components.EstadoFormulario
 import cl.duoc.mastermartini.ui.theme.MartiniBlue
-import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniOrange
 import cl.duoc.mastermartini.ui.theme.MartiniPeach
 import cl.duoc.mastermartini.ui.theme.MartiniPink
 import cl.duoc.mastermartini.ui.theme.MartiniTeal
-import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
 import cl.duoc.mastermartini.viewmodel.InteresesViewModel
 
@@ -87,7 +85,7 @@ fun InterestsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MartiniCream)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
         StepDots(totalPasos = 3, pasoActual = 1)
@@ -104,7 +102,7 @@ fun InterestsScreen(
         Text(
             text = "Selecciona tus preferencias para personalizar tu experiencia",
             style = MaterialTheme.typography.bodyMedium,
-            color = MartiniTextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(24.dp))
