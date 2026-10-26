@@ -11,7 +11,7 @@ El proyecto es un prototipo local con contenido de ejemplo. El registro guarda d
 
 - **Bienvenida y registro:** formulario con nombre, correo, contraseña, confirmación y aceptación de términos. Los campos muestran errores de validación y permiten mostrar u ocultar la contraseña.
 - **Intereses:** selección de preferencias que se guardan localmente.
-- **Catálogo:** búsqueda por nombre entre recetas de ejemplo y acceso al detalle de cada receta.
+- **Catálogo:** búsqueda por nombre, dos recetas destacadas y cinco recetas simples nuevas; cada tarjeta abre ingredientes, descripción y preparación paso a paso.
 - **Recetas:** vista de ingredientes y descripción, seguida de una preparación guiada paso a paso.
 - **Cursos:** listado de cursos de ejemplo.
 - **Perfil:** muestra el nombre, correo e intereses guardados. Permite editar nombre, correo, fecha de nacimiento y preferencias alimentarias.
@@ -23,7 +23,7 @@ Los datos y las recetas son de demostración. La lista de cursos no incluye repr
 
 - **Cámara y galería:** el manifiesto declara permisos y existe un `FileProvider`, pero aún no está implementado el flujo para tomar o seleccionar una foto ni guardarla en el perfil.
 - **Recetas guardadas:** el icono de favorito es visual; todavía no hay una sección funcional de “Mis recetas” ni persistencia de favoritos.
-- **Controles del catálogo:** los botones de menú y notificaciones, las categorías y “Ver todas” no tienen una acción funcional. En la barra inferior, los accesos a Cursos y Perfil están conectados; Inicio y Recetas no abren vistas independientes.
+- **Controles del catálogo:** se quitó el botón de menú sin acción asignada. Las categorías son visuales; en la barra inferior, los accesos a Cursos y Perfil están conectados, mientras Inicio y Recetas no abren vistas independientes. El icono de favorito es indicativo y no guarda recetas.
 - **Acceso:** la opción “Iniciar sesión” del registro lleva al catálogo, pero no hay un formulario de inicio de sesión ni autenticación real.
 - **Pruebas de interfaz:** hace falta recorrer el flujo completo en un teléfono o emulador y comprobar el comportamiento visual y la navegación en distintos tamaños de pantalla.
 
@@ -74,6 +74,6 @@ app\build\outputs\apk\debug\app-debug.apk
 
 ## Alcance de las pruebas
 
-Las pruebas incluidas en `ValidacionFormulariosTest.kt` comprueban reglas del registro y del perfil, incluyendo correo, contraseña, términos y fechas. No sustituyen las pruebas de navegación, de interfaz ni las comprobaciones de cámara y galería en un dispositivo.
+Las recetas nuevas se basan en investigación de preparaciones sencillas de queque, pan amasado, muffins, brownie y galletas. Las pruebas incluidas en `ValidacionFormulariosTest.kt` comprueban reglas del registro y del perfil, incluyendo correo, contraseña, términos y fechas. No sustituyen las pruebas de navegación, de interfaz ni las comprobaciones de cámara y galería en un dispositivo.
 
 El estado del proyecto descrito aquí distingue las funciones que ya tienen implementación en el código de las que todavía requieren desarrollo o una comprobación manual.
