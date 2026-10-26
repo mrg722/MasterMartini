@@ -25,52 +25,54 @@ import cl.duoc.mastermartini.ui.theme.MartiniGreen
 
 @Composable
 fun MartiniTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    leadingIcon: @Composable (() -> Unit)? = null,
-    errorMessage: String? = null,
-    isPassword: Boolean = false,
-    passwordVisible: Boolean = false,
-    onTogglePasswordVisibility: (() -> Unit)? = null,
-    keyboardType: KeyboardType = KeyboardType.Text
+    valor: String,
+    alCambiar: (String) -> Unit,
+    etiqueta: String,
+    modificador: Modifier = Modifier,
+    iconoInicial: @Composable (() -> Unit)? = null,
+    mensajeError: String? = null,
+    esContrasena: Boolean = false,
+    contrasenaVisible: Boolean = false,
+    alCambiarVisibilidad: (() -> Unit)? = null,
+    tipoTeclado: KeyboardType = KeyboardType.Text,
+    habilitado: Boolean = true
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modificador.fillMaxWidth()) {
         OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
+            value = valor,
+            onValueChange = alCambiar,
+            label = { Text(etiqueta) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            isError = errorMessage != null,
-            leadingIcon = leadingIcon,
-            visualTransformation = if (isPassword && !passwordVisible) {
+            enabled = habilitado,
+            isError = mensajeError != null,
+            leadingIcon = iconoInicial,
+            visualTransformation = if (esContrasena && !contrasenaVisible) {
                 PasswordVisualTransformation()
             } else {
                 VisualTransformation.None
             },
             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                keyboardType = if (isPassword) KeyboardType.Password else keyboardType
+                keyboardType = if (esContrasena) KeyboardType.Password else tipoTeclado
             ),
             trailingIcon = {
                 when {
-                    isPassword && onTogglePasswordVisibility != null -> {
-                        IconButton(onClick = onTogglePasswordVisibility) {
+                    esContrasena && alCambiarVisibilidad != null -> {
+                        IconButton(onClick = alCambiarVisibilidad, enabled = habilitado) {
                             Icon(
-                                imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                                imageVector = if (contrasenaVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = if (contrasenaVisible) "Ocultar contraseña" else "Mostrar contraseña"
                             )
                         }
                     }
-                    errorMessage != null -> {
+                    mensajeError != null -> {
                         Icon(
                             imageVector = Icons.Filled.Error,
                             contentDescription = "Error",
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
-                    value.isNotBlank() -> {
+                    valor.isNotBlank() -> {
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = "Campo válido",
@@ -86,9 +88,9 @@ fun MartiniTextField(
             ),
             shape = MaterialTheme.shapes.medium
         )
-        AnimatedVisibility(visible = errorMessage != null) {
+        AnimatedVisibility(visible = mensajeError != null) {
             Text(
-                text = errorMessage.orEmpty(),
+                text = mensajeError.orEmpty(),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
