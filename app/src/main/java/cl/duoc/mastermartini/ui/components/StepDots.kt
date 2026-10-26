@@ -28,15 +28,15 @@ fun StepDots(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        repeat(totalPasos) { index ->
-            val activo = index == pasoActual
+        repeat(totalPasos) { indice ->
+            val activo = indice == pasoActual
             val color by animateColorAsState(
                 targetValue = if (activo) MartiniGreen else MaterialTheme.colorScheme.outline,
-                label = "stepColor"
+                label = "colorPaso"
             )
             val ancho by animateDpAsState(
                 targetValue = if (activo) 24.dp else 8.dp,
-                label = "stepWidth"
+                label = "anchoPaso"
             )
             Box(
                 modifier = Modifier
