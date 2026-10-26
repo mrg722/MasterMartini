@@ -118,7 +118,7 @@ fun InterestsScreen(
                 InterestCard(
                     interes = interes,
                     seleccionado = interes.id in estado.seleccionados,
-                    onClick = { viewModel.onToggleInterest(interes.id) }
+                    alSeleccionar = { viewModel.onToggleInterest(interes.id) }
                 )
             }
         }
@@ -137,7 +137,7 @@ fun InterestsScreen(
 private fun InterestCard(
     interes: Interest,
     seleccionado: Boolean,
-    onClick: () -> Unit
+    alSeleccionar: () -> Unit
 ) {
     val colorBorde by animateColorAsState(
         targetValue = if (seleccionado) MartiniOrange else Color.Transparent,
@@ -154,7 +154,7 @@ private fun InterestCard(
         label = "tamanoIcono"
     )
     Card(
-        onClick = onClick,
+        onClick = alSeleccionar,
         modifier = Modifier
             .aspectRatio(1f)
             .border(width = 2.dp, color = colorBorde, shape = RoundedCornerShape(16.dp)),
