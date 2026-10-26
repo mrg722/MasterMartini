@@ -16,24 +16,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.data.local.PreferenciasUsuario
-import cl.duoc.mastermartini.ui.theme.MartiniCream
-import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
 
 @Composable
 fun PerfilScreen(alEditar: () -> Unit) {
     val contexto = LocalContext.current
     val preferencias = remember(contexto) { PreferenciasUsuario(contexto.applicationContext) }
-    val nombre by preferencias.nombreUsuario.collectAsState(initial = "")
-    val correo by preferencias.correoUsuario.collectAsState(initial = "")
+    val perfil by preferencias.perfilUsuario.collectAsState(initial = cl.duoc.mastermartini.data.model.PerfilUsuario())
     val intereses by preferencias.interesesUsuario.collectAsState(initial = emptySet())
 
-    Column(Modifier.fillMaxSize().background(MartiniCream).padding(20.dp)) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp)) {
         Text("Mi perfil", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(20.dp))
         Card(
@@ -42,8 +40,10 @@ fun PerfilScreen(alEditar: () -> Unit) {
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(Modifier.padding(20.dp)) {
-                Text(nombre.ifBlank { "Invitado" }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                if (correo.isNotBlank()) Text(correo, color = MartiniTextSecondary)
+                FotoPerfil(uriTexto = perfil.fotoUri, modifier = Modifier.align(Alignment.CenterHorizontally))
+                Spacer(Modifier.height(12.dp))
+                Text(perfil.nombre.ifBlank { "Invitado" }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                if (perfil.correo.isNotBlank()) Text(perfil.correo, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Spacer(Modifier.height(20.dp))
@@ -52,7 +52,7 @@ fun PerfilScreen(alEditar: () -> Unit) {
         Text(
             if (intereses.isEmpty()) "Aún no hay intereses seleccionados"
             else intereses.sorted().joinToString(" · ") { it.replace('_', ' ').replaceFirstChar(Char::uppercase) },
-            color = MartiniTextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(20.dp))
         MartiniPrimaryButton(text = "Editar perfil", onClick = alEditar)

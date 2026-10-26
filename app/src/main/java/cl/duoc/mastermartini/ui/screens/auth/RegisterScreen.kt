@@ -43,9 +43,7 @@ import cl.duoc.mastermartini.ui.components.EstadoFormulario
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.imePadding
 import cl.duoc.mastermartini.ui.components.StepDots
-import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniGreen
-import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
 import cl.duoc.mastermartini.viewmodel.RegistroViewModel
 
@@ -66,7 +64,7 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MartiniCream)
+            .background(MaterialTheme.colorScheme.background)
             .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 32.dp)
@@ -85,7 +83,7 @@ fun RegisterScreen(
         Text(
             text = "Únete a Master Martini y comienza a disfrutar de una vida más saludable",
             style = MaterialTheme.typography.bodyMedium,
-            color = MartiniTextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -181,7 +179,7 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text("¿Ya tienes cuenta? ", color = MartiniTextSecondary)
+            Text("¿Ya tienes cuenta? ", color = MaterialTheme.colorScheme.onSurfaceVariant)
             TextButton(onClick = onIniciarSesion, enabled = !estado.guardando, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
                 Text("Inicia sesión", color = MartiniGreen, fontWeight = FontWeight.SemiBold)
             }

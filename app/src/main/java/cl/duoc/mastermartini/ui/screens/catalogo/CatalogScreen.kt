@@ -2,7 +2,6 @@ package cl.duoc.mastermartini.ui.screens.catalogo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,30 +13,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,22 +45,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.data.model.Category
 import cl.duoc.mastermartini.data.model.Recipe
-import cl.duoc.mastermartini.ui.theme.MartiniCream
+import cl.duoc.mastermartini.ui.screens.detalle.recetasDisponibles
 import cl.duoc.mastermartini.ui.theme.MartiniGreen
-import cl.duoc.mastermartini.ui.theme.MartiniOrangeLight
-import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
 
 private val categorias = listOf(
     Category("recetas", "Recetas"),
-    Category("cursos", "Cursos"),
-    Category("mis_recetas", "Mis recetas")
+    Category("cursos", "Cursos")
 )
 
-private val recetasDestacadas = listOf(
-    Recipe("ensalada_mediterranea", "Ensalada mediterránea", 20, "Fácil"),
-    Recipe("salmon_horno", "Salmón al horno con verduras", 35, "Fácil", esFavorita = true)
-)
+private val recetasDestacadas = recetasDisponibles.map { receta ->
+    Recipe(receta.id, receta.titulo, receta.minutos, receta.dificultad)
+}
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +66,7 @@ fun CatalogScreen(
     alAbrirPerfil: () -> Unit = {}
 ) {
     var busqueda by remember { mutableStateOf("") }
-    var pestanaSeleccionada by remember { mutableStateOf(0) }
+    var categoriaSeleccionada by remember { mutableStateOf("recetas") }
     val recetasFiltradas = remember(busqueda) {
         if (busqueda.isBlank()) recetasDestacadas
         else recetasDestacadas.filter { receta ->
@@ -84,7 +75,8 @@ fun CatalogScreen(
     }
 
     Scaffold(
-        containerColor = MartiniCream,
+        containerColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -94,47 +86,45 @@ fun CatalogScreen(
                         color = MartiniGreen
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menú", tint = MartiniGreen)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Filled.Notifications, contentDescription = "Notificaciones", tint = MartiniGreen)
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MartiniGreen
+                )
             )
         },
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                val items = listOf(
-                    "Inicio" to Icons.Filled.Home,
+                val elementosNavegacion = listOf(
                     "Recetas" to Icons.Filled.Restaurant,
-                    "Cursos" to Icons.Filled.MenuBook,
+                    "Cursos" to Icons.AutoMirrored.Filled.MenuBook,
                     "Perfil" to Icons.Filled.Person
                 )
-                items.forEachIndexed { index, (label, icono) ->
+                elementosNavegacion.forEachIndexed { indice, (etiqueta, icono) ->
                     NavigationBarItem(
-                        selected = pestanaSeleccionada == index,
+                        selected = indice == 0,
                         onClick = {
-                            pestanaSeleccionada = index
-                            when (index) {
-                                2 -> alAbrirCursos()
-                                3 -> alAbrirPerfil()
+                            when (indice) {
+                                0 -> {
+                                    categoriaSeleccionada = "recetas"
+                                    busqueda = ""
+                                }
+                                1 -> alAbrirCursos()
+                                2 -> alAbrirPerfil()
                             }
                         },
                         icon = {
                             Icon(
                                 imageVector = icono,
-                                contentDescription = label
+                                contentDescription = etiqueta
                             )
                         },
-                        label = { Text(label) },
-                        colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+                        label = { Text(etiqueta) },
+                        colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MartiniGreen,
                             selectedTextColor = MartiniGreen,
-                            indicatorColor = MartiniOrangeLight
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer
                         )
                     )
                 }
@@ -153,10 +143,21 @@ fun CatalogScreen(
                 value = busqueda,
                 onValueChange = { busqueda = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar recetas, cursos...") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                placeholder = { Text("Buscar recetas", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                leadingIcon = {
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = MartiniGreen)
+                },
                 singleLine = true,
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MartiniGreen,
+                    focusedBorderColor = MartiniGreen,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -168,46 +169,23 @@ fun CatalogScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 categorias.forEach { categoria ->
-                    CategoryChip(categoria = categoria, modifier = Modifier.weight(1f))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(96.dp),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = MartiniOrangeLight)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Cocina saludable después de los 50",
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleMedium,
+                    CategoryChip(
+                        categoria = categoria,
+                        seleccionada = categoria.id == categoriaSeleccionada,
+                        alSeleccionar = {
+                            if (categoria.id == "cursos") alAbrirCursos()
+                            else categoriaSeleccionada = categoria.id
+                        },
                         modifier = Modifier.weight(1f)
                     )
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(MartiniGreen, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("→", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold)
-                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SeccionTitulo(titulo = "Recetas destacadas")
+            SeccionTitulo(
+                titulo = "Recetas destacadas"
+            )
             Spacer(modifier = Modifier.height(10.dp))
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -223,22 +201,32 @@ fun CatalogScreen(
 
 @Composable
 private fun SeccionTitulo(titulo: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text("Ver todas", color = MartiniGreen, fontWeight = FontWeight.SemiBold)
-    }
+    Text(
+        text = titulo,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onBackground
+    )
 }
 
 @Composable
-private fun CategoryChip(categoria: Category, modifier: Modifier = Modifier) {
+private fun CategoryChip(
+    categoria: Category,
+    seleccionada: Boolean,
+    alSeleccionar: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
+        onClick = alSeleccionar,
         modifier = modifier.height(76.dp),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = if (seleccionada) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
@@ -250,7 +238,12 @@ private fun CategoryChip(categoria: Category, modifier: Modifier = Modifier) {
         ) {
             Icon(Icons.Filled.Restaurant, contentDescription = null, tint = MartiniGreen)
             Spacer(modifier = Modifier.height(6.dp))
-            Text(categoria.titulo, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+            Text(
+                text = categoria.titulo,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -265,26 +258,18 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column {
-            Box(
+            Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(90.dp)
-                    .background(MartiniOrangeLight),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = if (receta.esFavorita) Icons.Filled.Bookmark else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Guardar receta",
-                        tint = MartiniGreen
-                    )
-                }
-            }
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+            )
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
                     text = receta.titulo,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -292,14 +277,14 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
                     Icon(
                         imageVector = Icons.Filled.AccessTime,
                         contentDescription = null,
-                        tint = MartiniTextSecondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${receta.minutos} min · ${receta.dificultad}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MartiniTextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

@@ -29,9 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.duoc.mastermartini.R
 import cl.duoc.mastermartini.ui.components.MartiniAccentButton
-import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniGreen
-import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
 
 @Composable
@@ -39,7 +37,7 @@ fun SplashScreen(onComenzar: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MartiniCream)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -65,14 +63,14 @@ fun SplashScreen(onComenzar: () -> Unit) {
             text = "Master",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = MartiniGreen,
+            color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
         Text(
             text = "Martini",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = MartiniGreen,
+            color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
 
@@ -81,7 +79,7 @@ fun SplashScreen(onComenzar: () -> Unit) {
         Text(
             text = stringResource(id = R.string.app_tagline),
             style = MaterialTheme.typography.bodyLarge,
-            color = MartiniTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 

@@ -4,5 +4,6 @@ data class PerfilUsuario(
     val nombre: String = "",
     val correo: String = "",
     val fechaNacimiento: String = "",
-    val preferenciasAlimentarias: String = "Sin restricciones"
+    val preferenciasAlimentarias: String = "Sin restricciones",
+    val fotoUri: String? = null
 )

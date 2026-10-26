@@ -21,6 +21,7 @@ class PreferenciasUsuario(private val contexto: Context) {
         val ONBOARDING_COMPLETO = booleanPreferencesKey("onboarding_completo")
         val FECHA_NACIMIENTO = stringPreferencesKey("fecha_nacimiento")
         val PREFERENCIAS_ALIMENTARIAS = stringPreferencesKey("preferencias_alimentarias")
+        val FOTO_PERFIL = stringPreferencesKey("foto_perfil")
     }
 
     val nombreUsuario: Flow<String> = contexto.almacen.data.map { it[Claves.NOMBRE] ?: "" }
@@ -32,7 +33,8 @@ class PreferenciasUsuario(private val contexto: Context) {
             nombre = preferencias[Claves.NOMBRE].orEmpty(),
             correo = preferencias[Claves.CORREO].orEmpty(),
             fechaNacimiento = preferencias[Claves.FECHA_NACIMIENTO].orEmpty(),
-            preferenciasAlimentarias = preferencias[Claves.PREFERENCIAS_ALIMENTARIAS] ?: "Sin restricciones"
+            preferenciasAlimentarias = preferencias[Claves.PREFERENCIAS_ALIMENTARIAS] ?: "Sin restricciones",
+            fotoUri = preferencias[Claves.FOTO_PERFIL]
         )
     }
 
@@ -42,6 +44,7 @@ class PreferenciasUsuario(private val contexto: Context) {
             preferencias[Claves.CORREO] = perfil.correo.trim()
             preferencias[Claves.FECHA_NACIMIENTO] = perfil.fechaNacimiento.trim()
             preferencias[Claves.PREFERENCIAS_ALIMENTARIAS] = perfil.preferenciasAlimentarias.trim()
+            perfil.fotoUri?.let { preferencias[Claves.FOTO_PERFIL] = it }
         }
     }
 

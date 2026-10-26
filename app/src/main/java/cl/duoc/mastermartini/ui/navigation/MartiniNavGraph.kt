@@ -107,7 +107,7 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
         }
 
         composable(MartiniRoutes.CURSOS) {
-            CursosScreen()
+            CursosScreen(alVolver = { navController.popBackStack() })
         }
 
         composable(MartiniRoutes.PERFIL) {
