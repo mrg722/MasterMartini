@@ -12,16 +12,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Restaurant
@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -45,7 +44,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.data.model.Category
@@ -67,6 +70,21 @@ private val recetasDestacadas = listOf(
     Recipe("salmon_horno", "Salmón al horno con verduras", 35, "Fácil", esFavorita = true)
 )
 
+private val recetasSimples = listOf(
+    Recipe("queque_casero", "Queque casero", 60, "Fácil"),
+    Recipe("pan_amasado", "Pan amasado", 45, "Fácil"),
+    Recipe("muffins_avena_platano", "Muffins de avena y plátano", 25, "Fácil"),
+    Recipe("brownie_chocolate", "Brownie de chocolate", 50, "Fácil"),
+    Recipe("galletas_avena_cacao", "Galletas de avena y cacao", 50, "Fácil")
+)
+
+private val todasLasRecetas = recetasDestacadas + recetasSimples
+private val coloresTitulosRecetas = listOf(
+    Color(0xFF4F9568),
+    Color(0xFF16877F),
+    Color(0xFF397FB4)
+)
+
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(
@@ -77,9 +95,8 @@ fun CatalogScreen(
     var busqueda by remember { mutableStateOf("") }
     var pestanaSeleccionada by remember { mutableStateOf(0) }
     val recetasFiltradas = remember(busqueda) {
-        if (busqueda.isBlank()) recetasDestacadas
-        else recetasDestacadas.filter { receta ->
-            receta.titulo.contains(busqueda, ignoreCase = true)
+        todasLasRecetas.filter { receta ->
+            receta.titulo.contains(busqueda.trim(), ignoreCase = true)
         }
     }
 
@@ -93,16 +110,6 @@ fun CatalogScreen(
                         fontWeight = FontWeight.Bold,
                         color = MartiniGreen
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menú", tint = MartiniGreen)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Filled.Notifications, contentDescription = "Notificaciones", tint = MartiniGreen)
-                    }
                 }
             )
         },
@@ -145,6 +152,7 @@ fun CatalogScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(12.dp))
@@ -153,7 +161,7 @@ fun CatalogScreen(
                 value = busqueda,
                 onValueChange = { busqueda = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar recetas, cursos...") },
+                placeholder = { Text("Buscar recetas...") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp)
@@ -207,30 +215,75 @@ fun CatalogScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SeccionTitulo(titulo = "Recetas destacadas")
-            Spacer(modifier = Modifier.height(10.dp))
+            if (busqueda.isBlank()) {
+                SeccionTitulo(titulo = "Recetas destacadas")
+                Spacer(modifier = Modifier.height(10.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    itemsIndexed(recetasDestacadas) { indice, receta ->
+                        RecipeCard(
+                            receta = receta,
+                            colorTitulo = coloresTitulosRecetas[indice % coloresTitulosRecetas.size],
+                            alAbrirReceta = alAbrirReceta
+                        )
+                    }
+                }
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                items(recetasFiltradas) { receta ->
-                    RecipeCard(receta, alAbrirReceta)
+                Spacer(modifier = Modifier.height(20.dp))
+                SeccionTitulo(titulo = "Recetas simples")
+                Spacer(modifier = Modifier.height(10.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    itemsIndexed(recetasSimples) { indice, receta ->
+                        RecipeCard(
+                            receta = receta,
+                            colorTitulo = coloresTitulosRecetas[indice % coloresTitulosRecetas.size],
+                            alAbrirReceta = alAbrirReceta
+                        )
+                    }
+                }
+            } else {
+                SeccionTitulo(titulo = "Resultados")
+                Spacer(modifier = Modifier.height(10.dp))
+                if (recetasFiltradas.isEmpty()) {
+                    Text(
+                        text = "No encontramos recetas con ese nombre.",
+                        color = MartiniTextSecondary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                } else {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        itemsIndexed(recetasFiltradas) { indice, receta ->
+                            RecipeCard(
+                                receta = receta,
+                                colorTitulo = coloresTitulosRecetas[indice % coloresTitulosRecetas.size],
+                                alAbrirReceta = alAbrirReceta
+                            )
+                        }
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
 
 @Composable
 private fun SeccionTitulo(titulo: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text("Ver todas", color = MartiniGreen, fontWeight = FontWeight.SemiBold)
+    val tituloMulticolor = buildAnnotatedString {
+        titulo.split(" ").forEachIndexed { indice, palabra ->
+            if (indice > 0) append(" ")
+            val color = coloresTitulosRecetas[indice % coloresTitulosRecetas.size]
+            withStyle(SpanStyle(color = color)) {
+                append(palabra)
+            }
+        }
     }
+
+    Text(
+        text = tituloMulticolor,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold
+    )
 }
 
 @Composable
@@ -256,7 +309,11 @@ private fun CategoryChip(categoria: Category, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
+private fun RecipeCard(
+    receta: Recipe,
+    colorTitulo: Color,
+    alAbrirReceta: (String) -> Unit
+) {
     Card(
         onClick = { alAbrirReceta(receta.id) },
         modifier = Modifier.width(170.dp),
@@ -272,17 +329,17 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
                     .background(MartiniOrangeLight),
                 contentAlignment = Alignment.TopEnd
             ) {
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = if (receta.esFavorita) Icons.Filled.Bookmark else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Guardar receta",
-                        tint = MartiniGreen
-                    )
-                }
+                Icon(
+                    imageVector = if (receta.esFavorita) Icons.Filled.Bookmark else Icons.Filled.FavoriteBorder,
+                    contentDescription = if (receta.esFavorita) "Receta destacada" else "Receta",
+                    tint = MartiniGreen,
+                    modifier = Modifier.padding(10.dp)
+                )
             }
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
                     text = receta.titulo,
+                    color = colorTitulo,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2
