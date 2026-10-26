@@ -69,9 +69,19 @@ private val recetasDestacadas = listOf(
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun CatalogScreen() {
+fun CatalogScreen(
+    alAbrirReceta: (String) -> Unit = {},
+    alAbrirCursos: () -> Unit = {},
+    alAbrirPerfil: () -> Unit = {}
+) {
     var busqueda by remember { mutableStateOf("") }
     var pestanaSeleccionada by remember { mutableStateOf(0) }
+    val recetasFiltradas = remember(busqueda) {
+        if (busqueda.isBlank()) recetasDestacadas
+        else recetasDestacadas.filter { receta ->
+            receta.titulo.contains(busqueda, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         containerColor = MartiniCream,
@@ -107,7 +117,13 @@ fun CatalogScreen() {
                 items.forEachIndexed { index, (label, icono) ->
                     NavigationBarItem(
                         selected = pestanaSeleccionada == index,
-                        onClick = { pestanaSeleccionada = index },
+                        onClick = {
+                            pestanaSeleccionada = index
+                            when (index) {
+                                2 -> alAbrirCursos()
+                                3 -> alAbrirPerfil()
+                            }
+                        },
                         icon = {
                             Icon(
                                 imageVector = icono,
@@ -195,8 +211,8 @@ fun CatalogScreen() {
             Spacer(modifier = Modifier.height(10.dp))
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                items(recetasDestacadas) { receta ->
-                    RecipeCard(receta)
+                items(recetasFiltradas) { receta ->
+                    RecipeCard(receta, alAbrirReceta)
                 }
             }
 
@@ -240,8 +256,9 @@ private fun CategoryChip(categoria: Category, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RecipeCard(receta: Recipe) {
+private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
     Card(
+        onClick = { alAbrirReceta(receta.id) },
         modifier = Modifier.width(170.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
