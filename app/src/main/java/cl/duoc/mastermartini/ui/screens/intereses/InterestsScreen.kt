@@ -139,7 +139,7 @@ private fun InterestCard(
     seleccionado: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor by animateColorAsState(
+    val colorBorde by animateColorAsState(
         targetValue = if (seleccionado) MartiniOrange else Color.Transparent,
         label = "bordeInteres"
     )
@@ -157,7 +157,7 @@ private fun InterestCard(
         onClick = onClick,
         modifier = Modifier
             .aspectRatio(1f)
-            .border(width = 2.dp, color = borderColor, shape = RoundedCornerShape(16.dp)),
+            .border(width = 2.dp, color = colorBorde, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = elevacionTarjeta)
