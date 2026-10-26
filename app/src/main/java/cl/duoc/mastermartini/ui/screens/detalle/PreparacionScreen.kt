@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
-import cl.duoc.mastermartini.ui.theme.MartiniOrangeLight
 
 @Composable
 fun PreparacionScreen(receta: RecetaContenido, alVolver: () -> Unit) {
@@ -58,11 +57,15 @@ fun PreparacionScreen(receta: RecetaContenido, alVolver: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(210.dp)
-                .background(MartiniOrangeLight, RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(18.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(receta.titulo, style = MaterialTheme.typography.titleLarge)
+            Text(
+                receta.titulo,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
         Spacer(Modifier.height(24.dp))
         Text(paso.first, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)

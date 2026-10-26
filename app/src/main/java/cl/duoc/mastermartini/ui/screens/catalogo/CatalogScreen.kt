@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Search
@@ -40,14 +40,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.data.model.Category
 import cl.duoc.mastermartini.data.model.Recipe
 import cl.duoc.mastermartini.ui.screens.detalle.recetasDisponibles
-import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniGreen
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
 
@@ -59,12 +57,6 @@ private val categorias = listOf(
 private val recetasDestacadas = recetasDisponibles.map { receta ->
     Recipe(receta.id, receta.titulo, receta.minutos, receta.dificultad)
 }
-
-private val fondoSuperficie = Color(0xFFFFFEFA)
-private val fondoSeleccionado = Color(0xFFFFE2C0)
-private val textoPrincipal = Color(0xFF263228)
-private val textoSecundario = Color(0xFF59645B)
-private val bordeCampo = Color(0xFF758077)
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -83,8 +75,8 @@ fun CatalogScreen(
     }
 
     Scaffold(
-        containerColor = MartiniCream,
-        contentColor = textoPrincipal,
+        containerColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -95,16 +87,16 @@ fun CatalogScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MartiniCream,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MartiniGreen
                 )
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = fondoSuperficie) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 val elementosNavegacion = listOf(
                     "Recetas" to Icons.Filled.Restaurant,
-                    "Cursos" to Icons.Filled.MenuBook,
+                    "Cursos" to Icons.AutoMirrored.Filled.MenuBook,
                     "Perfil" to Icons.Filled.Person
                 )
                 elementosNavegacion.forEachIndexed { indice, (etiqueta, icono) ->
@@ -130,9 +122,9 @@ fun CatalogScreen(
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MartiniGreen,
                             selectedTextColor = MartiniGreen,
-                            unselectedIconColor = textoSecundario,
-                            unselectedTextColor = textoSecundario,
-                            indicatorColor = fondoSeleccionado
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer
                         )
                     )
                 }
@@ -151,20 +143,20 @@ fun CatalogScreen(
                 value = busqueda,
                 onValueChange = { busqueda = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar recetas", color = textoSecundario) },
+                placeholder = { Text("Buscar recetas", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = {
                     Icon(Icons.Filled.Search, contentDescription = null, tint = MartiniGreen)
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = textoPrincipal,
-                    unfocusedTextColor = textoPrincipal,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     cursorColor = MartiniGreen,
                     focusedBorderColor = MartiniGreen,
-                    unfocusedBorderColor = bordeCampo,
-                    focusedContainerColor = fondoSuperficie,
-                    unfocusedContainerColor = fondoSuperficie
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
 
@@ -213,7 +205,7 @@ private fun SeccionTitulo(titulo: String) {
         text = titulo,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
-        color = textoPrincipal
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -229,7 +221,11 @@ private fun CategoryChip(
         modifier = modifier.height(76.dp),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (seleccionada) fondoSeleccionado else fondoSuperficie
+            containerColor = if (seleccionada) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -246,7 +242,7 @@ private fun CategoryChip(
                 text = categoria.titulo,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
-                color = textoPrincipal
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -258,7 +254,7 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
         onClick = { alAbrirReceta(receta.id) },
         modifier = Modifier.width(170.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = fondoSuperficie),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column {
@@ -266,14 +262,14 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(90.dp)
-                    .background(fondoSeleccionado)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
             )
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
                     text = receta.titulo,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = textoPrincipal,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -281,14 +277,14 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
                     Icon(
                         imageVector = Icons.Filled.AccessTime,
                         contentDescription = null,
-                        tint = textoSecundario,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${receta.minutos} min · ${receta.dificultad}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = textoSecundario
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

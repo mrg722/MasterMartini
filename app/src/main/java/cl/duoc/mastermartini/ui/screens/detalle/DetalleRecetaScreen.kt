@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
-import cl.duoc.mastermartini.ui.theme.MartiniOrangeLight
 
 @Composable
 fun DetalleRecetaScreen(receta: RecetaContenido, alVolver: () -> Unit, alPreparar: () -> Unit) {
@@ -42,12 +41,17 @@ fun DetalleRecetaScreen(receta: RecetaContenido, alVolver: () -> Unit, alPrepara
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
-                .background(MartiniOrangeLight, RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(18.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Master Martini", color = MaterialTheme.colorScheme.primary)
-            Text(receta.titulo, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text("Master Martini", color = MaterialTheme.colorScheme.onSecondaryContainer)
+            Text(
+                receta.titulo,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
         Spacer(Modifier.height(20.dp))
         Text(receta.titulo, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)

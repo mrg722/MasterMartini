@@ -3,7 +3,6 @@ package cl.duoc.mastermartini.ui.screens.perfil
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -67,10 +66,6 @@ fun EditarPerfil(alVolver: () -> Unit, modelo: PerfilViewModel = viewModel()) {
         }
         archivoPendiente.value = null
     }
-    val solicitarGaleria = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { concedido ->
-        if (concedido) lanzadorGaleria.launch("image/*")
-        else modelo.informarError("Se necesita permiso para acceder a tus fotos.")
-    }
     fun abrirCamara() {
         val directorio = contexto.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         if (directorio == null || (!directorio.exists() && !directorio.mkdirs())) {
@@ -121,11 +116,7 @@ fun EditarPerfil(alVolver: () -> Unit, modelo: PerfilViewModel = viewModel()) {
                     Text("Cámara", modifier = Modifier.padding(start = 8.dp))
                 }
                 OutlinedButton(
-                    onClick = {
-                        val permiso = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
-                        if (contexto.checkSelfPermission(permiso) == PackageManager.PERMISSION_GRANTED) lanzadorGaleria.launch("image/*")
-                        else solicitarGaleria.launch(permiso)
-                    },
+                    onClick = { lanzadorGaleria.launch("image/*") },
                     enabled = !estado.guardando,
                     modifier = Modifier.weight(1f)
                 ) {
