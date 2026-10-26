@@ -1,5 +1,11 @@
 package cl.duoc.mastermartini.ui.screens.auth
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +29,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -47,9 +54,10 @@ fun RegisterScreen(
 ) {
     val estado by viewModel.uiState.collectAsState()
 
-    if (estado.registroExitoso) {
-        onCuentaCreada()
-        return
+    LaunchedEffect(estado.registroExitoso) {
+        if (estado.registroExitoso) {
+            onCuentaCreada()
+        }
     }
 
     Column(
@@ -132,7 +140,13 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
-        if (estado.errorTerminos != null) {
+        AnimatedVisibility(
+            visible = estado.errorTerminos != null,
+            enter = fadeIn(animationSpec = tween(180)) +
+                expandVertically(animationSpec = tween(180)),
+            exit = fadeOut(animationSpec = tween(120)) +
+                shrinkVertically(animationSpec = tween(120))
+        ) {
             Text(
                 text = estado.errorTerminos.orEmpty(),
                 color = MaterialTheme.colorScheme.error,
