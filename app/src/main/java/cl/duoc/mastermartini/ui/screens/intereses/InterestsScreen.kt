@@ -50,6 +50,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.mastermartini.data.model.Interest
 import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
 import cl.duoc.mastermartini.ui.components.StepDots
+import cl.duoc.mastermartini.ui.components.EstadoFormulario
 import cl.duoc.mastermartini.ui.theme.MartiniBlue
 import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniOrange
@@ -58,7 +59,7 @@ import cl.duoc.mastermartini.ui.theme.MartiniPink
 import cl.duoc.mastermartini.ui.theme.MartiniTeal
 import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
-import cl.duoc.mastermartini.viewmodel.InterestsViewModel
+import cl.duoc.mastermartini.viewmodel.InteresesViewModel
 
 private fun interesesDisponibles() = listOf(
     Interest("recetas_saludables", "Recetas saludables", Icons.Filled.RestaurantMenu, MartiniPeach),
@@ -72,9 +73,9 @@ private fun interesesDisponibles() = listOf(
 @Composable
 fun InterestsScreen(
     onContinuar: () -> Unit,
-    viewModel: InterestsViewModel = viewModel()
+    modelo: InteresesViewModel = viewModel()
 ) {
-    val estado by viewModel.uiState.collectAsState()
+    val estado by modelo.estado.collectAsState()
     val intereses = remember { interesesDisponibles() }
 
     LaunchedEffect(estado.guardadoCompleto) {
@@ -118,16 +119,18 @@ fun InterestsScreen(
                 InterestCard(
                     interes = interes,
                     seleccionado = interes.id in estado.seleccionados,
-                    alSeleccionar = { viewModel.onToggleInterest(interes.id) }
+                    alSeleccionar = { modelo.seleccionarInteres(interes.id) }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        EstadoFormulario(ocupado = estado.guardando, error = estado.errorGuardado)
+
         MartiniPrimaryButton(
             text = "Continuar →",
-            onClick = viewModel::onContinuar,
+            onClick = modelo::onContinuar,
             enabled = estado.puedeContinuar
         )
     }

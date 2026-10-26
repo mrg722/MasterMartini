@@ -39,20 +39,23 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
 import cl.duoc.mastermartini.ui.components.MartiniTextField
+import cl.duoc.mastermartini.ui.components.EstadoFormulario
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.layout.imePadding
 import cl.duoc.mastermartini.ui.components.StepDots
 import cl.duoc.mastermartini.ui.theme.MartiniCream
 import cl.duoc.mastermartini.ui.theme.MartiniGreen
 import cl.duoc.mastermartini.ui.theme.MartiniTextSecondary
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
-import cl.duoc.mastermartini.viewmodel.RegisterViewModel
+import cl.duoc.mastermartini.viewmodel.RegistroViewModel
 
 @Composable
 fun RegisterScreen(
     onCuentaCreada: () -> Unit,
     onIniciarSesion: () -> Unit,
-    viewModel: RegisterViewModel = viewModel()
+    modelo: RegistroViewModel = viewModel()
 ) {
-    val estado by viewModel.uiState.collectAsState()
+    val estado by modelo.estado.collectAsState()
 
     LaunchedEffect(estado.registroExitoso) {
         if (estado.registroExitoso) {
@@ -64,6 +67,7 @@ fun RegisterScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MartiniCream)
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
@@ -87,44 +91,49 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         MartiniTextField(
-            value = estado.nombre,
-            onValueChange = viewModel::onNombreChange,
-            label = "Nombre completo",
-            errorMessage = estado.errorNombre,
-            leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Person, contentDescription = null) }
+            valor = estado.nombre,
+            alCambiar = modelo::cambiarNombre,
+            etiqueta = "Nombre completo",
+            habilitado = !estado.guardando,
+            mensajeError = estado.errorNombre,
+            iconoInicial = { androidx.compose.material3.Icon(Icons.Filled.Person, contentDescription = null) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         MartiniTextField(
-            value = estado.correo,
-            onValueChange = viewModel::onCorreoChange,
-            label = "Correo electrónico",
-            errorMessage = estado.errorCorreo,
-            leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Email, contentDescription = null) }
+            valor = estado.correo,
+            alCambiar = modelo::cambiarCorreo,
+            etiqueta = "Correo electrónico",
+            tipoTeclado = KeyboardType.Email,
+            habilitado = !estado.guardando,
+            mensajeError = estado.errorCorreo,
+            iconoInicial = { androidx.compose.material3.Icon(Icons.Filled.Email, contentDescription = null) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         MartiniTextField(
-            value = estado.contrasena,
-            onValueChange = viewModel::onContrasenaChange,
-            label = "Contraseña",
-            errorMessage = estado.errorContrasena,
-            isPassword = true,
-            passwordVisible = estado.contrasenaVisible,
-            onTogglePasswordVisibility = viewModel::onToggleContrasenaVisible,
-            leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Lock, contentDescription = null) }
+            valor = estado.contrasena,
+            alCambiar = modelo::cambiarContrasena,
+            etiqueta = "Contraseña",
+            habilitado = !estado.guardando,
+            mensajeError = estado.errorContrasena,
+            esContrasena = true,
+            contrasenaVisible = estado.contrasenaVisible,
+            alCambiarVisibilidad = modelo::cambiarVisibilidadContrasena,
+            iconoInicial = { androidx.compose.material3.Icon(Icons.Filled.Lock, contentDescription = null) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         MartiniTextField(
-            value = estado.confirmacion,
-            onValueChange = viewModel::onConfirmacionChange,
-            label = "Confirmar contraseña",
-            errorMessage = estado.errorConfirmacion,
-            isPassword = true,
-            passwordVisible = estado.confirmacionVisible,
-            onTogglePasswordVisibility = viewModel::onToggleConfirmacionVisible,
-            leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Lock, contentDescription = null) }
+            valor = estado.confirmacion,
+            alCambiar = modelo::cambiarConfirmacion,
+            etiqueta = "Confirmar contraseña",
+            habilitado = !estado.guardando,
+            mensajeError = estado.errorConfirmacion,
+            esContrasena = true,
+            contrasenaVisible = estado.confirmacionVisible,
+            alCambiarVisibilidad = modelo::cambiarVisibilidadConfirmacion,
+            iconoInicial = { androidx.compose.material3.Icon(Icons.Filled.Lock, contentDescription = null) }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -132,7 +141,8 @@ fun RegisterScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = estado.terminosAceptados,
-                onCheckedChange = viewModel::onTerminosChange,
+                enabled = !estado.guardando,
+                onCheckedChange = modelo::cambiarTerminos,
                 colors = CheckboxDefaults.colors(checkedColor = MartiniGreen)
             )
             Text(
@@ -159,8 +169,11 @@ fun RegisterScreen(
 
         MartiniPrimaryButton(
             text = "Crear cuenta",
-            onClick = viewModel::onCrearCuenta
+            onClick = modelo::crearCuenta,
+            enabled = !estado.guardando && !estado.registroExitoso
         )
+
+        EstadoFormulario(ocupado = estado.guardando, error = estado.errorGuardado)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,7 +182,7 @@ fun RegisterScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             Text("¿Ya tienes cuenta? ", color = MartiniTextSecondary)
-            TextButton(onClick = onIniciarSesion, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+            TextButton(onClick = onIniciarSesion, enabled = !estado.guardando, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
                 Text("Inicia sesión", color = MartiniGreen, fontWeight = FontWeight.SemiBold)
             }
         }
