@@ -1,6 +1,8 @@
 package cl.duoc.mastermartini.ui.screens.intereses
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -137,7 +139,17 @@ private fun InterestCard(
 ) {
     val borderColor by animateColorAsState(
         targetValue = if (seleccionado) MartiniOrange else Color.Transparent,
-        label = "interestBorder"
+        label = "bordeInteres"
+    )
+    val elevacionTarjeta by animateDpAsState(
+        targetValue = if (seleccionado) 4.dp else 1.dp,
+        animationSpec = tween(durationMillis = 180),
+        label = "elevacionTarjeta"
+    )
+    val tamanoIcono by animateDpAsState(
+        targetValue = if (seleccionado) 48.dp else 44.dp,
+        animationSpec = tween(durationMillis = 180),
+        label = "tamanoIcono"
     )
     Card(
         onClick = onClick,
@@ -146,7 +158,7 @@ private fun InterestCard(
             .border(width = 2.dp, color = borderColor, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = elevacionTarjeta)
     ) {
         Column(
             modifier = Modifier
@@ -157,7 +169,7 @@ private fun InterestCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(tamanoIcono)
                     .background(interes.colorFondo.copy(alpha = 0.18f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
