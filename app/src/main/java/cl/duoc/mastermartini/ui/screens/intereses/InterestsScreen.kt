@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,9 +77,10 @@ fun InterestsScreen(
     val estado by viewModel.uiState.collectAsState()
     val intereses = remember { interesesDisponibles() }
 
-    if (estado.guardadoCompleto) {
-        onContinuar()
-        return
+    LaunchedEffect(estado.guardadoCompleto) {
+        if (estado.guardadoCompleto) {
+            onContinuar()
+        }
     }
 
     Column(
