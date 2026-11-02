@@ -1,45 +1,76 @@
 package cl.duoc.mastermartini.ui.navigation
 
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cl.duoc.mastermartini.data.local.PreferenciasUsuario
+import cl.duoc.mastermartini.data.model.buscarCurso
+import cl.duoc.mastermartini.ui.components.SeccionPrincipal
+import cl.duoc.mastermartini.ui.screens.ajustes.AjustesScreen
 import cl.duoc.mastermartini.ui.screens.auth.RegisterScreen
 import cl.duoc.mastermartini.ui.screens.catalogo.CatalogScreen
-import cl.duoc.mastermartini.ui.screens.inicio.SplashScreen
-import cl.duoc.mastermartini.ui.screens.intereses.InterestsScreen
 import cl.duoc.mastermartini.ui.screens.cursos.CursosScreen
+import cl.duoc.mastermartini.ui.screens.cursos.DetalleCursoScreen
 import cl.duoc.mastermartini.ui.screens.detalle.DetalleRecetaScreen
 import cl.duoc.mastermartini.ui.screens.detalle.PreparacionScreen
+import cl.duoc.mastermartini.ui.screens.detalle.buscarReceta
+import cl.duoc.mastermartini.ui.screens.detalle.buscarVideoPorId
 import cl.duoc.mastermartini.ui.screens.detalle.recetasDisponibles
-import cl.duoc.mastermartini.ui.screens.perfil.PerfilScreen
+import cl.duoc.mastermartini.ui.screens.inicio.SplashScreen
+import cl.duoc.mastermartini.ui.screens.intereses.InterestsScreen
 import cl.duoc.mastermartini.ui.screens.perfil.EditarPerfil
+import cl.duoc.mastermartini.ui.screens.perfil.PerfilScreen
+import cl.duoc.mastermartini.ui.screens.video.ReproductorVideoScreen
+import kotlinx.coroutines.launch
 
+/**
+ * Grafo de navegación de la aplicación.
+ *
+ * La pantalla de inicio nunca salta sola al catálogo: siempre hay que pulsar
+ * "Comenzar". Lo único que cambia según el estado guardado es el destino de ese
+ * botón (catálogo si la sesión sigue abierta, registro si no).
+ */
 @Composable
 fun MartiniNavGraph(navController: NavHostController = rememberNavController()) {
     val contexto = LocalContext.current
     val preferencias = remember(contexto) { PreferenciasUsuario(contexto.applicationContext) }
-    val registroCompleto by preferencias.registroCompleto.collectAsState(initial = null)
-    val rutaActual = navController.currentBackStackEntryAsState().value?.destination?.route
+    val alcance = rememberCoroutineScope()
 
-    LaunchedEffect(registroCompleto, rutaActual) {
-        if (registroCompleto == true && rutaActual == MartiniRoutes.SPLASH) {
-            navController.navigate(MartiniRoutes.CATALOG) {
-                popUpTo(MartiniRoutes.SPLASH) { inclusive = true }
-            }
+    val sesionActiva by preferencias.sesionActiva.collectAsState(initial = false)
+    val registroCompleto by preferencias.registroCompleto.collectAsState(initial = false)
+    val favoritas by preferencias.recetasFavoritas.collectAsState(initial = emptySet())
+
+    /** Lleva a una de las secciones principales sin apilar pantallas repetidas. */
+    fun navegarASeccion(seccion: SeccionPrincipal) {
+        val destino = when (seccion) {
+            SeccionPrincipal.RECETAS -> MartiniRoutes.CATALOG
+            SeccionPrincipal.CURSOS -> MartiniRoutes.CURSOS
+            SeccionPrincipal.PERFIL -> MartiniRoutes.PERFIL
+            SeccionPrincipal.AJUSTES -> MartiniRoutes.AJUSTES
+        }
+        navController.navigate(destino) {
+            popUpTo(MartiniRoutes.CATALOG) { inclusive = false }
+            launchSingleTop = true
+        }
+    }
+
+    /** Vuelve al inicio dejando la pila limpia (tras cerrar sesión o eliminar la cuenta). */
+    fun volverAlInicio() {
+        navController.navigate(MartiniRoutes.SPLASH) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            launchSingleTop = true
         }
     }
 
@@ -65,8 +96,14 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
     ) {
         composable(MartiniRoutes.SPLASH) {
             SplashScreen(
+                sesionIniciada = sesionActiva && registroCompleto,
                 onComenzar = {
-                    navController.navigate(MartiniRoutes.REGISTER) {
+                    val destino = if (sesionActiva && registroCompleto) {
+                        MartiniRoutes.CATALOG
+                    } else {
+                        MartiniRoutes.REGISTER
+                    }
+                    navController.navigate(destino) {
                         popUpTo(MartiniRoutes.SPLASH) { inclusive = true }
                     }
                 }
@@ -81,8 +118,9 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
                     }
                 },
                 onIniciarSesion = {
+                    alcance.launch { preferencias.iniciarSesion() }
                     navController.navigate(MartiniRoutes.CATALOG) {
-                        popUpTo(MartiniRoutes.SPLASH) { inclusive = true }
+                        popUpTo(MartiniRoutes.REGISTER) { inclusive = true }
                     }
                 }
             )
@@ -92,7 +130,7 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
             InterestsScreen(
                 onContinuar = {
                     navController.navigate(MartiniRoutes.CATALOG) {
-                        popUpTo(MartiniRoutes.SPLASH) { inclusive = true }
+                        popUpTo(MartiniRoutes.INTERESTS) { inclusive = true }
                     }
                 }
             )
@@ -101,44 +139,115 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
         composable(MartiniRoutes.CATALOG) {
             CatalogScreen(
                 alAbrirReceta = { recetaId -> navController.navigate(MartiniRoutes.detalle(recetaId)) },
-                alAbrirCursos = { navController.navigate(MartiniRoutes.CURSOS) },
-                alAbrirPerfil = { navController.navigate(MartiniRoutes.PERFIL) }
+                alNavegar = { seccion -> navegarASeccion(seccion) }
             )
         }
 
         composable(MartiniRoutes.CURSOS) {
-            CursosScreen(alVolver = { navController.popBackStack() })
+            CursosScreen(
+                alAbrirCurso = { cursoId -> navController.navigate(MartiniRoutes.curso(cursoId)) },
+                alNavegar = { seccion -> navegarASeccion(seccion) }
+            )
+        }
+
+        composable(MartiniRoutes.DETALLE_CURSO) { entrada ->
+            val curso = buscarCurso(entrada.arguments?.getString("cursoId"))
+            if (curso == null) {
+                navController.popBackStack()
+            } else {
+                DetalleCursoScreen(
+                    curso = curso,
+                    alVolver = { navController.popBackStack() },
+                    alReproducirVideo = { video ->
+                        navController.navigate(MartiniRoutes.video(video.youtubeId))
+                    },
+                    alAbrirReceta = { recetaId ->
+                        navController.navigate(MartiniRoutes.detalle(recetaId))
+                    }
+                )
+            }
         }
 
         composable(MartiniRoutes.PERFIL) {
-            PerfilScreen(alEditar = { navController.navigate(MartiniRoutes.EDITAR_PERFIL) })
+            PerfilScreen(
+                alEditar = { navController.navigate(MartiniRoutes.EDITAR_PERFIL) },
+                alAbrirAjustes = { navController.navigate(MartiniRoutes.AJUSTES) },
+                alAbrirFavoritas = { navegarASeccion(SeccionPrincipal.RECETAS) },
+                alAbrirIntereses = { navController.navigate(MartiniRoutes.INTERESTS) },
+                alNavegar = { seccion -> navegarASeccion(seccion) }
+            )
         }
 
         composable(MartiniRoutes.EDITAR_PERFIL) {
             EditarPerfil(alVolver = { navController.popBackStack() })
         }
 
+        composable(MartiniRoutes.AJUSTES) {
+            AjustesScreen(
+                alVolver = { navController.popBackStack() },
+                alEditarPerfil = { navController.navigate(MartiniRoutes.EDITAR_PERFIL) },
+                alCrearCuenta = { navController.navigate(MartiniRoutes.REGISTER) },
+                alSalirDeLaSesion = { volverAlInicio() },
+                alNavegar = { seccion -> navegarASeccion(seccion) }
+            )
+        }
+
         composable(MartiniRoutes.DETALLE) { entrada ->
-            val recetaId = entrada.arguments?.getString("recetaId")
-            val receta = recetasDisponibles.firstOrNull { it.id == recetaId }
-            if (receta != null) {
+            val receta = buscarReceta(entrada.arguments?.getString("recetaId"))
+            if (receta == null) {
+                navController.popBackStack()
+            } else {
                 DetalleRecetaScreen(
                     receta = receta,
+                    esFavorita = favoritas.contains(receta.id),
                     alVolver = { navController.popBackStack() },
-                    alPreparar = { navController.navigate(MartiniRoutes.preparacion(receta.id)) }
+                    alPreparar = { navController.navigate(MartiniRoutes.preparacion(receta.id)) },
+                    alAlternarFavorita = {
+                        alcance.launch { preferencias.alternarFavorita(receta.id) }
+                    },
+                    alReproducirVideo = { video ->
+                        navController.navigate(MartiniRoutes.video(video.youtubeId))
+                    }
                 )
             }
         }
 
         composable(MartiniRoutes.PREPARACION) { entrada ->
-            val recetaId = entrada.arguments?.getString("recetaId")
-            val receta = recetasDisponibles.firstOrNull { it.id == recetaId }
-            if (receta != null) {
+            val receta = buscarReceta(entrada.arguments?.getString("recetaId"))
+            if (receta == null) {
+                navController.popBackStack()
+            } else {
                 PreparacionScreen(
                     receta = receta,
+                    alVolver = { navController.popBackStack() },
+                    alReproducirVideo = { video ->
+                        navController.navigate(MartiniRoutes.video(video.youtubeId))
+                    }
+                )
+            }
+        }
+
+        composable(MartiniRoutes.VIDEO) { entrada ->
+            val videoId = entrada.arguments?.getString("videoId")
+            val video = buscarVideoPorId(videoId)
+            if (video == null) {
+                navController.popBackStack()
+            } else {
+                val receta = recetaDelVideo(videoId)
+                ReproductorVideoScreen(
+                    video = video,
+                    contextoReceta = receta,
                     alVolver = { navController.popBackStack() }
                 )
             }
         }
     }
+}
+
+/** Título de la receta a la que pertenece un video, para mostrarlo en el reproductor. */
+private fun recetaDelVideo(videoId: String?): String? {
+    if (videoId.isNullOrBlank()) return null
+    return recetasDisponibles.firstOrNull { receta ->
+        receta.video?.youtubeId == videoId || receta.videoComplementario?.youtubeId == videoId
+    }?.titulo
 }

@@ -43,7 +43,6 @@ import cl.duoc.mastermartini.ui.components.EstadoFormulario
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.imePadding
 import cl.duoc.mastermartini.ui.components.StepDots
-import cl.duoc.mastermartini.ui.theme.MartiniGreen
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
 import cl.duoc.mastermartini.viewmodel.RegistroViewModel
 
@@ -141,7 +140,7 @@ fun RegisterScreen(
                 checked = estado.terminosAceptados,
                 enabled = !estado.guardando,
                 onCheckedChange = modelo::cambiarTerminos,
-                colors = CheckboxDefaults.colors(checkedColor = MartiniGreen)
+                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
             )
             Text(
                 text = "Acepto los términos y condiciones",
@@ -181,7 +180,7 @@ fun RegisterScreen(
         ) {
             Text("¿Ya tienes cuenta? ", color = MaterialTheme.colorScheme.onSurfaceVariant)
             TextButton(onClick = onIniciarSesion, enabled = !estado.guardando, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                Text("Inicia sesión", color = MartiniGreen, fontWeight = FontWeight.SemiBold)
+                Text("Inicia sesión", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             }
         }
     }

@@ -1,70 +1,82 @@
 package cl.duoc.mastermartini.ui.screens.cursos
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cl.duoc.mastermartini.ui.theme.MartiniGreen
+import cl.duoc.mastermartini.data.model.cursosDisponibles
+import cl.duoc.mastermartini.ui.components.MartiniBottomBar
+import cl.duoc.mastermartini.ui.components.MartiniEstadoVacio
+import cl.duoc.mastermartini.ui.components.MartiniTarjetaCurso
+import cl.duoc.mastermartini.ui.components.MartiniTituloSeccion
+import cl.duoc.mastermartini.ui.components.MartiniTopBar
+import cl.duoc.mastermartini.ui.components.SeccionPrincipal
 
-private val cursos = listOf(
-    "Cocina saludable para el corazón" to "5 clases · Nivel básico",
-    "Cocina mediterránea en casa" to "6 clases · Nivel básico",
-    "Postres saludables" to "4 clases · Nivel básico",
-    "Cocina rápida y nutritiva" to "5 clases · Nivel básico"
-)
-
+/**
+ * Listado de cursos. Cada curso agrupa clases que se apoyan en los videos ya
+ * verificados del recetario, de modo que no haya enlaces sin respaldo.
+ */
 @Composable
-fun CursosScreen(alVolver: () -> Unit) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = alVolver) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver al catálogo")
-                }
-                Text("Cursos de cocina", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.height(12.dp))
-            Text("Explora contenidos para cocinar de forma saludable.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(12.dp))
+fun CursosScreen(
+    alAbrirCurso: (String) -> Unit,
+    alNavegar: (SeccionPrincipal) -> Unit
+) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            MartiniTopBar(
+                titulo = "Cursos de cocina",
+                subtitulo = "Clases con video, de lo básico a lo horneado"
+            )
+        },
+        bottomBar = {
+            MartiniBottomBar(
+                seccionActual = SeccionPrincipal.CURSOS,
+                alNavegar = alNavegar
+            )
         }
-        items(cursos) { (titulo, descripcion) ->
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("▣", color = MartiniGreen, style = MaterialTheme.typography.headlineMedium)
-                    Column(Modifier.padding(start = 16.dp)) {
-                        Text(titulo, fontWeight = FontWeight.SemiBold)
-                        Text(descripcion, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+    ) { relleno ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(relleno)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            item {
+                MartiniTituloSeccion(
+                    titulo = "Rutas de aprendizaje",
+                    detalle = "${cursosDisponibles.size} cursos disponibles"
+                )
+            }
+
+            if (cursosDisponibles.isEmpty()) {
+                item {
+                    MartiniEstadoVacio(
+                        titulo = "Sin cursos por ahora",
+                        mensaje = "Pronto se agregarán nuevas clases al catálogo.",
+                        icono = Icons.AutoMirrored.Filled.MenuBook
+                    )
+                }
+            } else {
+                items(cursosDisponibles, key = { it.id }) { curso ->
+                    MartiniTarjetaCurso(
+                        titulo = curso.titulo,
+                        descripcion = curso.descripcion,
+                        resumen = curso.resumenCorto,
+                        urlMiniatura = curso.clases.firstOrNull()?.video?.urlMiniatura,
+                        alAbrir = { alAbrirCurso(curso.id) }
+                    )
                 }
             }
         }
