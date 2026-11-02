@@ -52,7 +52,6 @@ import cl.duoc.mastermartini.ui.components.MartiniPrimaryButton
 import cl.duoc.mastermartini.ui.components.StepDots
 import cl.duoc.mastermartini.ui.components.EstadoFormulario
 import cl.duoc.mastermartini.ui.theme.MartiniBlue
-import cl.duoc.mastermartini.ui.theme.MartiniOrange
 import cl.duoc.mastermartini.ui.theme.MartiniPeach
 import cl.duoc.mastermartini.ui.theme.MartiniPink
 import cl.duoc.mastermartini.ui.theme.MartiniTeal
@@ -141,7 +140,7 @@ private fun InterestCard(
     alSeleccionar: () -> Unit
 ) {
     val colorBorde by animateColorAsState(
-        targetValue = if (seleccionado) MartiniOrange else Color.Transparent,
+        targetValue = if (seleccionado) MaterialTheme.colorScheme.secondary else Color.Transparent,
         label = "bordeInteres"
     )
     val elevacionTarjeta by animateDpAsState(

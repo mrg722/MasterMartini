@@ -1,290 +1,181 @@
 package cl.duoc.mastermartini.ui.screens.catalogo
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cl.duoc.mastermartini.data.model.Category
-import cl.duoc.mastermartini.data.model.Recipe
-import cl.duoc.mastermartini.ui.screens.detalle.recetasDisponibles
-import cl.duoc.mastermartini.ui.theme.MartiniGreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.mastermartini.ui.components.MartiniAviso
+import cl.duoc.mastermartini.ui.components.MartiniBottomBar
+import cl.duoc.mastermartini.ui.components.MartiniEstadoVacio
+import cl.duoc.mastermartini.ui.components.MartiniTarjetaReceta
+import cl.duoc.mastermartini.ui.components.MartiniTituloSeccion
+import cl.duoc.mastermartini.ui.components.MartiniTopBar
+import cl.duoc.mastermartini.ui.components.SeccionPrincipal
 import cl.duoc.mastermartini.ui.theme.MasterMartiniTheme
+import cl.duoc.mastermartini.viewmodel.CatalogoViewModel
+import cl.duoc.mastermartini.viewmodel.FiltroCatalogo
 
-private val categorias = listOf(
-    Category("recetas", "Recetas"),
-    Category("cursos", "Cursos")
-)
-
-private val recetasDestacadas = recetasDisponibles.map { receta ->
-    Recipe(receta.id, receta.titulo, receta.minutos, receta.dificultad)
-}
-
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+/**
+ * Catálogo de recetas. La lista se desplaza en vertical (una receta bajo la
+ * otra) y cada tarjeta muestra la portada del video cuando existe.
+ */
 @Composable
 fun CatalogScreen(
     alAbrirReceta: (String) -> Unit = {},
-    alAbrirCursos: () -> Unit = {},
-    alAbrirPerfil: () -> Unit = {}
+    alNavegar: (SeccionPrincipal) -> Unit = {},
+    modelo: CatalogoViewModel = viewModel()
 ) {
-    var busqueda by remember { mutableStateOf("") }
-    var categoriaSeleccionada by remember { mutableStateOf("recetas") }
-    val recetasFiltradas = remember(busqueda) {
-        if (busqueda.isBlank()) recetasDestacadas
-        else recetasDestacadas.filter { receta ->
-            receta.titulo.contains(busqueda, ignoreCase = true)
-        }
-    }
+    val estado by modelo.estado.collectAsState()
+    val recetas = estado.recetasVisibles
+    val saludo = estado.nombreUsuario.trim().substringBefore(' ').ifBlank { "" }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Master Martini",
-                        fontWeight = FontWeight.Bold,
-                        color = MartiniGreen
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MartiniGreen
-                )
+            MartiniTopBar(
+                titulo = "Master Martini",
+                subtitulo = if (saludo.isBlank()) {
+                    "Recetas chilenas paso a paso"
+                } else {
+                    "Hola, $saludo · recetas para hoy"
+                }
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                val elementosNavegacion = listOf(
-                    "Recetas" to Icons.Filled.Restaurant,
-                    "Cursos" to Icons.AutoMirrored.Filled.MenuBook,
-                    "Perfil" to Icons.Filled.Person
-                )
-                elementosNavegacion.forEachIndexed { indice, (etiqueta, icono) ->
-                    NavigationBarItem(
-                        selected = indice == 0,
-                        onClick = {
-                            when (indice) {
-                                0 -> {
-                                    categoriaSeleccionada = "recetas"
-                                    busqueda = ""
-                                }
-                                1 -> alAbrirCursos()
-                                2 -> alAbrirPerfil()
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = icono,
-                                contentDescription = etiqueta
-                            )
-                        },
-                        label = { Text(etiqueta) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MartiniGreen,
-                            selectedTextColor = MartiniGreen,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer
+            MartiniBottomBar(
+                seccionActual = SeccionPrincipal.RECETAS,
+                alNavegar = alNavegar
+            )
+        }
+    ) { relleno ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(relleno)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp)
+        ) {
+            item {
+                OutlinedTextField(
+                    value = estado.busqueda,
+                    onValueChange = modelo::cambiarBusqueda,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Buscar receta o ingrediente") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
                         )
+                    },
+                    trailingIcon = {
+                        if (estado.busqueda.isNotBlank()) {
+                            IconButton(onClick = modelo::limpiarBusqueda) {
+                                Icon(Icons.Filled.Close, contentDescription = "Limpiar búsqueda")
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.medium,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     )
+                )
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FiltroCatalogo.entries.forEach { filtro ->
+                        val seleccionado = filtro == estado.filtro
+                        FilterChip(
+                            selected = seleccionado,
+                            onClick = { modelo.cambiarFiltro(filtro) },
+                            label = { Text(filtro.etiqueta) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
                 }
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp)
-        ) {
-            Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = busqueda,
-                onValueChange = { busqueda = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar recetas", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                leadingIcon = {
-                    Icon(Icons.Filled.Search, contentDescription = null, tint = MartiniGreen)
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    cursorColor = MartiniGreen,
-                    focusedBorderColor = MartiniGreen,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            item {
+                MartiniAviso(mensaje = estado.error, esError = true)
+            }
+
+            item {
+                MartiniTituloSeccion(
+                    titulo = when (estado.filtro) {
+                        FiltroCatalogo.TODAS -> "Recetas del recetario"
+                        FiltroCatalogo.CON_VIDEO -> "Recetas con video"
+                        FiltroCatalogo.FAVORITAS -> "Tus recetas guardadas"
+                    },
+                    detalle = "${recetas.size} de ${estado.totalConVideo} recetas tienen video",
+                    modifier = Modifier.animateContentSize()
                 )
-            )
+            }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            SeccionTitulo(titulo = "Categorías")
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                categorias.forEach { categoria ->
-                    CategoryChip(
-                        categoria = categoria,
-                        seleccionada = categoria.id == categoriaSeleccionada,
-                        alSeleccionar = {
-                            if (categoria.id == "cursos") alAbrirCursos()
-                            else categoriaSeleccionada = categoria.id
+            if (recetas.isEmpty()) {
+                item {
+                    MartiniEstadoVacio(
+                        titulo = "Sin resultados",
+                        mensaje = when (estado.filtro) {
+                            FiltroCatalogo.FAVORITAS ->
+                                "Toca el corazón de una receta para guardarla aquí."
+                            else ->
+                                "Prueba con otro nombre o revisa el filtro seleccionado."
                         },
-                        modifier = Modifier.weight(1f)
+                        icono = Icons.AutoMirrored.Filled.MenuBook
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            SeccionTitulo(
-                titulo = "Recetas destacadas"
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                items(recetasFiltradas) { receta ->
-                    RecipeCard(receta, alAbrirReceta)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-private fun SeccionTitulo(titulo: String) {
-    Text(
-        text = titulo,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-}
-
-@Composable
-private fun CategoryChip(
-    categoria: Category,
-    seleccionada: Boolean,
-    alSeleccionar: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = alSeleccionar,
-        modifier = modifier.height(76.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (seleccionada) {
-                MaterialTheme.colorScheme.secondaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
-            }
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(Icons.Filled.Restaurant, contentDescription = null, tint = MartiniGreen)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = categoria.titulo,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
-private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
-    Card(
-        onClick = { alAbrirReceta(receta.id) },
-        modifier = Modifier.width(170.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(90.dp)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-            )
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text(
-                    text = receta.titulo,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.AccessTime,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${receta.minutos} min · ${receta.dificultad}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                items(recetas, key = { it.id }) { receta ->
+                    MartiniTarjetaReceta(
+                        titulo = receta.titulo,
+                        descripcion = receta.descripcion,
+                        minutos = receta.minutos,
+                        dificultad = receta.dificultad,
+                        urlMiniatura = receta.video?.urlMiniatura,
+                        tieneVideo = receta.video != null,
+                        esFavorita = estado.favoritas.contains(receta.id),
+                        alAbrir = { alAbrirReceta(receta.id) },
+                        alAlternarFavorita = { modelo.alternarFavorita(receta.id) }
                     )
                 }
             }
@@ -296,6 +187,8 @@ private fun RecipeCard(receta: Recipe, alAbrirReceta: (String) -> Unit) {
 @Composable
 private fun CatalogScreenPreview() {
     MasterMartiniTheme {
-        CatalogScreen()
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text("Vista previa del catálogo", modifier = Modifier.padding(16.dp))
+        }
     }
 }
