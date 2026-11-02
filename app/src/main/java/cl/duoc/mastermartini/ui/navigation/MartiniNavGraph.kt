@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -153,7 +154,8 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
         composable(MartiniRoutes.DETALLE_CURSO) { entrada ->
             val curso = buscarCurso(entrada.arguments?.getString("cursoId"))
             if (curso == null) {
-                navController.popBackStack()
+                // Salir del destino inválido como efecto, no durante la composición.
+                LaunchedEffect(Unit) { navController.popBackStack() }
             } else {
                 DetalleCursoScreen(
                     curso = curso,
@@ -195,7 +197,8 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
         composable(MartiniRoutes.DETALLE) { entrada ->
             val receta = buscarReceta(entrada.arguments?.getString("recetaId"))
             if (receta == null) {
-                navController.popBackStack()
+                // Salir del destino inválido como efecto, no durante la composición.
+                LaunchedEffect(Unit) { navController.popBackStack() }
             } else {
                 DetalleRecetaScreen(
                     receta = receta,
@@ -215,7 +218,8 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
         composable(MartiniRoutes.PREPARACION) { entrada ->
             val receta = buscarReceta(entrada.arguments?.getString("recetaId"))
             if (receta == null) {
-                navController.popBackStack()
+                // Salir del destino inválido como efecto, no durante la composición.
+                LaunchedEffect(Unit) { navController.popBackStack() }
             } else {
                 PreparacionScreen(
                     receta = receta,
@@ -231,7 +235,8 @@ fun MartiniNavGraph(navController: NavHostController = rememberNavController()) 
             val videoId = entrada.arguments?.getString("videoId")
             val video = buscarVideoPorId(videoId)
             if (video == null) {
-                navController.popBackStack()
+                // Salir del destino inválido como efecto, no durante la composición.
+                LaunchedEffect(Unit) { navController.popBackStack() }
             } else {
                 val receta = recetaDelVideo(videoId)
                 ReproductorVideoScreen(

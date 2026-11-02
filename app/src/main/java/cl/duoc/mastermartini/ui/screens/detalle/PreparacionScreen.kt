@@ -53,7 +53,6 @@ fun PreparacionScreen(
 ) {
     var pasoActual by rememberSaveable(receta.id) { mutableIntStateOf(0) }
     val totalPasos = receta.pasos.size
-    val paso = receta.pasos[pasoActual]
     val video = receta.video
 
     Scaffold(

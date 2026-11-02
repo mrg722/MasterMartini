@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -161,7 +161,7 @@ fun CatalogScreen(
                             else ->
                                 "Prueba con otro nombre o revisa el filtro seleccionado."
                         },
-                        icono = Icons.Filled.MenuBook
+                        icono = Icons.AutoMirrored.Filled.MenuBook
                     )
                 }
             } else {
